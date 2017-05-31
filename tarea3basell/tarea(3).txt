@@ -1,0 +1,291 @@
+####################################################################################################################################
+Ejercicio 2: En la tabla notas realizar funciones de agregación de plr que calculen lo siguiente:
+
+**El mínimo,máximo,primer cuartil,mediana,tercer cuartil,   máximo y percentil 33 de los campos:nota_mate,nota_ingles, nota_fisica. 
+
+####################################################################################################################################
+Minimo:
+
+create or replace function r_min(_float8) returns float as '
+min(arg1)' language 'plr';
+
+CREATE AGGREGATE minimo (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_min
+);
+
+SELECT minimo(nota_mate) mini_Mate,minimo(nota_ingles) mini_Ingles,minimo(nota_fisica) mini_Fisica FROM notas;
+
+ mini_mate | mini_ingles | mini_fisica 
+-----------+-------------+-------------
+      2.65 |           4 |        1.28
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+Maximo:
+
+create or replace function r_maximo(_float8) returns float as '
+maximo(arg1)' language 'plr';
+
+CREATE AGGREGATE max (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_maximo
+);
+
+SELECT max(nota_mate) maxim_Mate,max(nota_ingles)
+maxim_Ingles,max(nota_fisica) maxim_Fisica FROM notas;
+
+ maxim_mate | maxim_ingles | maxim_fisica 
+------------+--------------+--------------
+       7.42 |         7.99 |         8.98
+
+------------------------------------------------------------------------------------------------------------------------------------
+Primer Cuartil:
+
+create or replace function r_primer_cuartil(_float8) returns float as '
+quantile(arg1, probs=0.25)' language 'plr';
+
+
+CREATE AGGREGATE primer_cuartil (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_primer_cuartil    
+);
+
+SELECT primer_cuartil(nota_mate) cuar_1Mate,primer_cuartil(nota_ingles) cuar_1Ingles,primer_cuartil(nota_fisica) cuar_1Fisica FROM notas;
+
+ cuar_1mate | cuar_1ingles | cuar_1fisica 
+------------+--------------+--------------
+     4.0825 |        5.225 |       3.7075
+---------------------------------------------------------------------------------------------------------------------------------------
+Mediana:
+
+create or replace function r_median(_float8) returns float as '
+quantile(arg1,probs=0.5)' language 'plr';
+
+CREATE AGGREGATE mediana (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_median
+);
+
+SELECT mediana(nota_mate) median_Mate, mediana(nota_ingles) median_Ingles, mediana(nota_fisica) median_Fisica FROM notas;
+
+
+ median_mate | median_ingles | median_fisica 
+-------------+---------------+---------------
+       4.495 |         6.415 |          4.54
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+Tercer Cuartil:
+
+create or replace function r_Tercer_Cuartil(_float8) returns float as '
+quantile(arg1,probs=0.75)' language 'plr';
+
+CREATE AGGREGATE Tercer_Cuartil (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_Tercer_Cuartil
+);
+
+SELECT Tercer_Cuartil(nota_mate) cuar_3Mate, Tercer_Cuartil(nota_ingles) cuar_3Ingles,Tercer_Cuartil(nota_fisica) cuar_3Fisica FROM notas;
+
+ cuar_3mate | cuar_3ingles | cuar_3fisica ;
+------------+--------------+--------------
+     5.0775 |         7.14 |         5.52
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+Maximo:
+
+create or replace function r_maximo(_float8) returns float as '
+maximo(arg1)' language 'plr';
+
+CREATE AGGREGATE max (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_maximo
+);
+
+SELECT max(nota_mate) maxim_Mate,max(nota_ingles)
+maxim_Ingles,max(nota_fisica) maxim_Fisica FROM notas;
+
+maxim_mate | maxim_ingles | maxim_fisica 
+------------+--------------+--------------
+       7.42 |         7.99 |         8.98
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+Percentil 33:
+
+create or replace function r_percent_33(_float8) returns float as'                                        
+quantile(arg1,probs=0.33)' language 'plr';
+
+CREATE AGGREGATE percentil_33 (                                                  
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_percent_33
+);
+
+SELECT percentil_33(nota_mate) perc_33Mate, percentil_33(nota_ingles) perc_33Ingles, 
+percentil_33(nota_fisica) perc_33Fisica FROM notas;
+
+perc_33mate | perc_33ingles | perc_33fisica 
+-------------+---------------+---------------
+        4.22 |        5.5901 |        3.9934
+
+#############################################################################################################################
+**El mínimo, máximo, primer cuartil, mediana, tercer cuartil, máximo y percentil 33 de los campos: 
+nota_mate, nota_ingles, nota_fisica pero agrupados por sección.
+#############################################################################################################################
+Minimo: 
+
+SELECT seccion, minimo(nota_mate) mini_Mate,minimo(nota_ingles) mini_Ingles,minimo(nota_fisica) mini_Fisica FROM notas GROUP BY seccion;
+
+ seccion | mini_mate | mini_ingles | mini_fisica 
+---------+-----------+-------------+-------------
+ B       |      2.65 |           4 |        1.28
+ A       |      2.65 |        4.13 |        2.57
+ D       |      2.65 |        4.05 |        1.64
+ C       |      2.65 |        4.16 |        2.46
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Maximo:
+
+SELECT seccion, max(nota_mate) maxim_Mate,max(nota_ingles)maxim_Ingles,max(nota_fisica) maxim_Fisica FROM notas GROUP BY seccion;
+
+ seccion | maxim_mate | maxim_ingles | maxim_fisica 
+---------+------------+--------------+--------------
+ B       |       7.42 |         7.99 |         8.98
+ A       |       7.42 |         7.95 |          6.9
+ D       |       7.42 |         7.96 |         6.77
+ C       |       7.42 |         7.98 |         7.44
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Primer Cuartil:
+
+SELECT seccion, primer_cuartil(nota_mate) cuar_1Mate,primer_cuartil(nota_ingles) cuar_1Ingles,primer_cuartil(nota_fisica) cuar_1Fisica FROM notas GROUP BY seccion;
+
+ seccion | cuar_1mate | cuar_1ingles | cuar_1fisica 
+---------+------------+--------------+--------------
+ B       |      4.095 |       5.1775 |       3.8325
+ A       |      4.095 |       5.5525 |       3.7675
+ D       |      4.015 |        4.985 |       3.7475
+ C       |     4.0675 |       5.4275 |         3.59
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+Mediana:
+
+SELECT seccion, mediana(nota_mate) median_Mate, mediana(nota_ingles) median_Ingles, mediana(nota_fisica) median_Fisica FROM notas GROUP BY seccion;
+
+seccion | median_mate | median_ingles | median_fisica 
+---------+-------------+---------------+---------------
+ B       |       4.495 |         6.215 |          4.55
+ A       |        4.47 |          6.47 |         4.445
+ D       |       4.495 |          6.42 |         4.595
+ C       |       4.505 |          6.61 |         4.555
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+Tercer Cuartil:
+
+SELECT seccion,Tercer_Cuartil(nota_mate) cuar_3Mate, Tercer_Cuartil(nota_ingles) cuar_3Ingles,Tercer_Cuartil(nota_fisica) cuar_3Fisica FROM notas GROUP BY seccion;
+
+seccion | cuar_3mate | cuar_3ingles | cuar_3fisica 
+---------+------------+--------------+--------------
+ B       |       5.06 |       6.7875 |       5.5875
+ A       |     5.2425 |       7.1075 |        5.495
+ D       |     4.9575 |       7.2075 |         5.51
+ C       |     5.1125 |         7.29 |       5.4125
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+Percintil 33:
+
+SELECT seccion, percentil_33(nota_mate) perc_33Mate, percentil_33(nota_ingles) perc_33Ingles, percentil_33(nota_fisica) perc_33Fisica FROM notas GROUP BY seccion;
+
+seccion | perc_33mate | perc_33ingles | perc_33fisica 
+---------+-------------+---------------+---------------
+ B       |        4.22 |        5.5036 |        4.1802
+ A       |      4.2319 |        5.6751 |        3.9055
+ D       |      4.1702 |          5.43 |        3.9953
+ C       |      4.2319 |        5.7861 |        3.7759
+
+
+
+####################################################################################################################################################
+3. Realizar una función window que calcule el coeficiente de correlación para cada uno de las distintasnotas, es decir:
+
+**notas_mate con nota_ingles
+**notas_mate con nota_fisica
+**notas_ingles con nota_fisica
+####################################################################################################################################################
+CREATE OR REPLACE 
+FUNCTION r_corelacion(float8, float8)
+RETURNS float8 AS
+$BODY$
+  x <- farg1
+  y <- farg2 
+  return(cor(x,y))
+$BODY$
+LANGUAGE plr WINDOW;
+
+
+SELECT r_corelacion(nota_mate,nota_ingles) OVER () FROM notas LIMIT 1;
+
+ r_corelacion     
+---------------------
+ -0.0544244235756368
+
+
+SELECT r_corelacion(nota_mate,nota_fisica) OVER () FROM notas LIMIT 1;
+
+ r_corelacion    
+-------------------
+ 0.690223956719496
+
+
+SELECT r_corelacion(nota_ingles,nota_fisica) OVER () FROM notas LIMIT 1;
+
+ r_corelacion     
+---------------------
+ -0.0662602121773806
+
+#################################################################################################################################################
+4. Realizar una función de agregación en plr que calcule el p-valor para la prueba de hipótesis de Wilcoxon con un valor de mu=5 para las notas en mate, inglés y física.
+La función en R es wilcox.test.
+#################################################################################################################################################
+
+create or replace function r_pvalue_wilcoxon(_float8) returns float as '                                  
+ wilcox.test(arg1,mu=5)$p.value' language 'plr';
+
+
+CREATE AGGREGATE pvalor_wilcoxon (
+sfunc = plr_array_accum,                                                      
+basetype = float8,
+stype = _float8,
+finalfunc = r_pvalue_wilcoxon
+);
+
+
+SELECT pvalor_wilcoxon(nota_mate) p_valor_Mate, pvalor_wilcoxon(nota_ingles) p_valor_Ingles, pvalor_wilcoxon(nota_fisica) p_valor_Fisica FROM notas;
+
+ p_valor_mate     |    p_valor_ingles    |   p_valor_fisica    
+----------------------+----------------------+---------------------
+ 7.52962165511264e-11 | 3.56913026643541e-24 | 2.1715861501853e-06
+
+
+wilcox.test(x,mu=5)$p.value
+
+
